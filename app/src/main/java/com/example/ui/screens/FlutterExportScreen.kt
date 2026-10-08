@@ -262,6 +262,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Flutter Android Scaffolding
+        run: flutter create . --org com.aistudio.ripomr --project-name rip_omr --platforms android
+
       - name: Get Dependencies
         run: flutter pub get
 

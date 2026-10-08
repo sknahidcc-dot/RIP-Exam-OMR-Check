@@ -211,7 +211,7 @@ fun SplashScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "RIP Exam OMR Check",
+                    text = "RIP OMR Check",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = CyanNeon,

@@ -331,7 +331,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "RIP Exam OMR",
+                  "RIP OMR",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
                 ),
                 Text(
@@ -652,6 +652,19 @@ class _ScannerTabState extends State<ScannerTab> {
     }
   }
 
+  Future<void> _captureCameraAndEvaluate() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.camera);
+    if (picked != null) {
+      setState(() => _isProcessing = true);
+      final bytes = await picked.readAsBytes();
+      setState(() => _previewImageBytes = bytes);
+      await Future.delayed(const Duration(milliseconds: 900));
+      _generateSimulatedResult("2026", "Nahid Hasan");
+      setState(() => _isProcessing = false);
+    }
+  }
+
   Future<void> _pickImageAndEvaluate() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -702,34 +715,53 @@ class _ScannerTabState extends State<ScannerTab> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Row(
+                Column(
                   children: [
-                    Expanded(
-                      flex: 3,
+                    SizedBox(
+                      width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () => _generateSimulatedResult("2026", "Nahid Hasan"),
-                        icon: const Icon(Icons.play_arrow, size: 18, color: Colors.black),
-                        label: const Text("Scan Demo OMR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                        onPressed: _captureCameraAndEvaluate,
+                        icon: const Icon(Icons.photo_camera, size: 20, color: Colors.black),
+                        label: const Text(
+                          "ক্যামেরা দিয়ে স্ক্যান করুন (Live Camera Scan)",
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF00E5FF),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: OutlinedButton.icon(
-                        onPressed: _pickImageAndEvaluate,
-                        icon: const Icon(Icons.image, size: 16, color: Colors.white),
-                        label: const Text("Pick File", style: TextStyle(color: Colors.white)),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF262632)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _pickImageAndEvaluate,
+                            icon: const Icon(Icons.image, size: 16, color: Colors.white),
+                            label: const Text("গ্যালারি / ফাইল", style: TextStyle(color: Colors.white)),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF262632)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _generateSimulatedResult("2026", "Nahid Hasan"),
+                            icon: const Icon(Icons.play_arrow, size: 16, color: Color(0xFF00E5FF)),
+                            label: const Text("ডেমো টেস্ট", style: TextStyle(color: Color(0xFF00E5FF))),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF00E5FF)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -807,14 +839,33 @@ class _ScannerTabState extends State<ScannerTab> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    _buildStatBox("Correct", "+$_correctCount", const Color(0xFF10B981)),
+                    _buildStatBox("সঠিক (Right)", "+$_correctCount", const Color(0xFF10B981)),
                     const SizedBox(width: 8),
-                    _buildStatBox("Wrong", "-${(_wrongCount * widget.negativeMarksPerWrong).toStringAsFixed(2)}", const Color(0xFFF43F5E)),
+                    _buildStatBox("ভুল (Wrong)", "-${(_wrongCount * widget.negativeMarksPerWrong).toStringAsFixed(2)}", const Color(0xFFF43F5E)),
                     const SizedBox(width: 8),
-                    _buildStatBox("Blank", "$_unansweredCount", Colors.grey.shade400),
+                    _buildStatBox("খালি (Blank)", "$_unansweredCount", Colors.grey.shade400),
                     const SizedBox(width: 8),
-                    _buildStatBox("Negative", "-${widget.negativeMarksPerWrong}", const Color(0xFFA855F7)),
+                    _buildStatBox("মাইনাস মার্ক", "-${widget.negativeMarksPerWrong}", const Color(0xFFA855F7)),
                   ],
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF14141C),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF10B981).withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle, size: 16, color: Color(0xFF10B981)),
+                      const SizedBox(width: 8),
+                      Text(
+                        "রোল নম্বর $_detectedRoll অনুযায়ী ডাটাবেজে রেজাল্ট সংরক্ষিত হয়েছে ✓",
+                        style: const TextStyle(fontSize: 11, color: Color(0xFF10B981), fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

@@ -78,8 +78,8 @@ fun TopNavBar(
 
                 Column {
                     Text(
-                        text = "RIP Exam OMR",
-                        fontSize = 17.sp,
+                        text = "RIP OMR",
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = TextWhite
                     )

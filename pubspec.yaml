@@ -1,4 +1,4 @@
-name: rip_exam_omr
+name: rip_omr
 description: "AMOLED OMR sheet scanner and evaluator with Computer Vision by Nahid Hasan"
 publish_to: "none"
 version: 1.0.0+1

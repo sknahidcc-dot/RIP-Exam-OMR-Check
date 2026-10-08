@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "RIP Exam OMR"
+rootProject.name = "RIP OMR"
 
 include(":app")

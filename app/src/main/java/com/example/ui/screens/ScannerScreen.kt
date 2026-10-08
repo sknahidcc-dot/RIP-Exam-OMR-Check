@@ -122,6 +122,15 @@ fun ScannerScreen(viewModel: MainViewModel) {
         }
     }
 
+    // Direct Camera Launcher for scanning physical OMR sheet in hand
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        bitmap?.let {
+            viewModel.evaluateCustomBitmap(it)
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -177,53 +186,77 @@ fun ScannerScreen(viewModel: MainViewModel) {
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Buttons to load or simulate sheet
-                    Row(
+                    // Action Buttons for Camera, Gallery, and Demo
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Button(
-                            onClick = {
-                                viewModel.generateTestSheetAndScan(
-                                    roll = rollInput,
-                                    name = nameInput,
-                                    simulatedAccuracy = selectedAccuracy
-                                )
-                            },
+                            onClick = { cameraLauncher.launch(null) },
                             modifier = Modifier
-                                .weight(1.3f)
-                                .height(46.dp)
-                                .testTag("simulate_and_scan_button"),
-                            shape = RoundedCornerShape(12.dp),
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .testTag("camera_scan_button"),
+                            shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = CyanNeon,
                                 contentColor = AmoledBlack
                             )
                         ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Scan Demo OMR", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "ক্যামেরা দিয়ে স্ক্যান করুন (Live Camera Scan)",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
 
-                        OutlinedButton(
-                            onClick = {
-                                photoPickerLauncher.launch(
-                                    androidx.activity.result.PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(46.dp)
-                                .testTag("pick_image_button"),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextWhite),
-                            border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(DarkBorder))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Pick Image", fontSize = 13.sp)
+                            OutlinedButton(
+                                onClick = {
+                                    photoPickerLauncher.launch(
+                                        androidx.activity.result.PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp)
+                                    .testTag("pick_image_button"),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextWhite),
+                                border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(DarkBorder))
+                            ) {
+                                Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("গ্যালারি / ফাইল", fontSize = 12.sp)
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.generateTestSheetAndScan(
+                                        roll = rollInput,
+                                        name = nameInput,
+                                        simulatedAccuracy = selectedAccuracy
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(1.2f)
+                                    .height(44.dp)
+                                    .testTag("simulate_and_scan_button"),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanNeon),
+                                border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(DarkBorder))
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("ডেমো ওএমআর টেস্ট", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            }
                         }
                     }
 
@@ -505,32 +538,59 @@ private fun ScoreCardSection(result: OmrScanResult) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BreakdownStatBox(
-                    title = "Correct",
+                    title = "সঠিক (Correct)",
                     value = result.correctCount.toString(),
                     subText = "+${result.correctCount}",
                     color = EmeraldGreen,
                     modifier = Modifier.weight(1f)
                 )
                 BreakdownStatBox(
-                    title = "Wrong",
+                    title = "ভুল (Wrong)",
                     value = result.wrongCount.toString(),
                     subText = "-${String.format("%.2f", result.wrongCount * result.negativeMarksPerWrong)}",
                     color = PinkNeon,
                     modifier = Modifier.weight(1f)
                 )
                 BreakdownStatBox(
-                    title = "Blank",
+                    title = "খালি (Blank)",
                     value = result.unansweredCount.toString(),
                     subText = "0",
                     color = TextMuted,
                     modifier = Modifier.weight(1f)
                 )
                 BreakdownStatBox(
-                    title = "Negative",
+                    title = "মাইনাস মার্ক",
                     value = "-${result.negativeMarksPerWrong}",
-                    subText = "per wrong",
+                    subText = "প্রতি ভুলে",
                     color = PurpleNeon,
                     modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Auto-saved confirmation badge by Roll Number
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(DarkCardBg)
+                    .border(1.dp, EmeraldGreen.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = EmeraldGreen,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "রোল নম্বর ${result.detectedRoll} অনুযায়ী ডাটাবেজে রেজাল্ট সংরক্ষিত হয়েছে ✓",
+                    fontSize = 11.sp,
+                    color = EmeraldGreen,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
