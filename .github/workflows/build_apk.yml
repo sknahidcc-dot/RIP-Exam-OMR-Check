@@ -1,0 +1,91 @@
+name: Build & Release OMR Flutter APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17 JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 🚀 Setup Flutter Environment
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Get Flutter Packages
+        run: flutter pub get
+
+      - name: 🔨 Build Release APK
+        run: flutter build apk --release --split-per-abi=false
+
+      - name: 📦 Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RIP-Exam-OMR-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: 🏷️ Determine Release Tag
+        id: release_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=v1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚀 Create GitHub Release with APK
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: "RIP Exam OMR Check ${{ steps.release_tag.outputs.tag }}"
+          files: build/app/outputs/flutter-apk/app-release.apk
+          draft: false
+          prerelease: false
+          body: |
+            ### 📱 RIP Exam OMR Check - Automated Mobile APK Build
+            
+            **Developer:** Nahid Hasan  
+            **Institute:** University of Barishal  
+            **Address:** Harinakuntu Jhenaidah  
+            **Contact:** sknahid.study@gmail.com  
+            
+            ---
+            #### 🌟 Features in this build:
+            - **AMOLED Pitch Black Theme (#000000)** & iOS Motion Splash Screen
+            - **1723 x 2448 px** Resolution Coordinate Processing
+            - **4-Digit Roll Number Bubble Extraction** (0..9 matrix)
+            - **100 Questions OMR Bubble Evaluation** (3 Columns)
+            - **Dynamic Parameters:** Total Questions, Passing Marks (80%), Negative Marking (-0.25)
+            - **Student Profiles & Local Database History**
+            - **Interactive Analytics:** Score trajectory & Pass/Fail graphs
+            
+            *Direct download link for `app-release.apk` is attached below.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

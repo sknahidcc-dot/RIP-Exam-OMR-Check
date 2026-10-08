@@ -1,0 +1,29 @@
+name: rip_exam_omr
+description: "AMOLED OMR sheet scanner and evaluator with Computer Vision by Nahid Hasan"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  image: ^4.2.0
+  camera: ^0.10.6
+  image_picker: ^1.1.2
+  path_provider: ^2.1.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  fl_chart: ^0.68.0
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

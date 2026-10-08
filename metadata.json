@@ -1,0 +1,6 @@
+{
+  "name": "RIP Exam OMR",
+  "description": "AMOLED OMR Sheet Scanner and Evaluator with Computer Vision roll number and answer checking by Nahid Hasan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
