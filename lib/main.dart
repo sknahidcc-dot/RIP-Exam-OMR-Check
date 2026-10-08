@@ -1313,7 +1313,7 @@ class AnalyticsTab extends StatelessWidget {
                       titlesData: const FlTitlesData(show: false),
                       borderData: FlBorderData(show: false),
                       lineBarsData: [
-                        LineBarData(
+                        LineChartBarData(
                           isCurved: true,
                           color: const Color(0xFF00E5FF),
                           barWidth: 3,

@@ -263,7 +263,15 @@ jobs:
           cache: true
 
       - name: Generate Flutter Android Scaffolding
-        run: flutter create . --org com.aistudio.ripomr --project-name rip_omr --platforms android
+        run: |
+          flutter create . --org com.aistudio.ripomr --project-name rip_omr --platforms android
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/g' android/app/build.gradle || true
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/g' android/app/build.gradle || true
+          fi
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/g' android/app/build.gradle.kts || true
+          fi
 
       - name: Get Dependencies
         run: flutter pub get
